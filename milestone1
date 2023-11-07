@@ -1,0 +1,248 @@
+# Time2Read App for CS 361
+# Email: reynosgw@oregonstate.edu
+# Date: 10/31/2023
+# Author: Gwenn Thompson
+
+
+import time
+
+
+class InvalidEntry(Exception):
+    pass
+
+
+class UsernameTaken(Exception):
+    pass
+
+
+class Mismatch(Exception):
+    pass
+
+
+class NotFound(Exception):
+    pass
+
+
+class IncorrectPassword(Exception):
+    pass
+
+
+users = {}
+user_name = ""
+page = 's'
+book_length = 0
+test_time = 0
+conversion_options = ['1', '2', '3']
+
+
+def nav_menu():
+    print("Enter 'h' at any time to return to the homepage")
+    print("Enter 'q' at any time to exit program\n")
+
+
+while page != 'q':
+    # Start Page
+    if page == 's':
+        print("\nWelcome to Time2Read. Please login or create an account to get started.\n")
+        while True:
+            try:
+                choice = input("Press 'c' to create a new account, press 'l' to login, or press 'q' to quit: ")
+                if choice.lower() == 'c':
+                    page = 'c'
+                    break
+                elif choice.lower() == 'l':
+                    page = 'l'
+                    break
+                elif choice.lower() == 'q':
+                    bye = input("Are you sure you would like to exit the program? Y/N: ")
+                    if bye == 'y' or bye == 'Y':
+                        page = 'q'
+                        break
+                    else:
+                        page = 's'
+                        break
+                else:
+                    raise InvalidEntry()
+            except InvalidEntry as error:
+                print("That is not a valid choice.")
+
+    # Create Account Page
+    if page == 'c':
+        while True:
+            try:
+                user_name = input("\nTo create an account, please choose a username: ")
+                if user_name in users:
+                    raise UsernameTaken()
+                else:
+                    while True:
+                        try:
+                            password = input("Please enter a password: ")
+                            verify_password = input("Please re-enter password: ")
+                            if password != verify_password:
+                                raise Mismatch()
+                            else:
+                                users[user_name] = password
+                                print("Account created. Please login.")
+                                page = 'l'
+                                break
+                        except Mismatch as error:
+                            print("Passwords don't match.")
+                        break
+            except UsernameTaken as error:
+                print("That name is already in use. Please try again or log in.")
+            break
+
+    # Login Page
+    elif page == 'l':
+        while True:
+            try:
+                name = input("\nPlease enter your username, or enter 'c' to go to create account,"
+                             " or enter 'q' to quit: ")
+                if name.lower() == 'c':
+                    page = 'c'
+                    break
+                elif name.lower() == 'q':
+                    bye = input("Are you sure you would like to exit the program? Y/N: ")
+                    if bye == 'y' or bye == 'Y':
+                        page = 'q'
+                        break
+                    else:
+                        page = 'l'
+                elif name not in users:
+                    raise NotFound()
+                else:
+                    while True:
+                        try:
+                            password = input("Enter password: ")
+                            if password == users[user_name]:
+                                page = 'h'
+                                break
+                            else:
+                                raise IncorrectPassword
+                        except IncorrectPassword as error:
+                            print("Incorrect password.")
+            except NotFound as error:
+                print("Username not found. Try again or create new account.")
+            break
+
+    # Home page
+    elif page == 'h':
+        while True:
+            print("Press 'q' at any time to exit program.")
+            try:
+                print("\nWelcome " + user_name + "!")
+                print("Let's get started. We are going to find out approximately how long it will take you to "
+                      "read your book. We will need a few minutes to gather some information from you.")
+                ready = input("Enter 'y' if you would like to continue or 'q' to exit: ")
+                if ready.lower() == "q":
+                    bye = input("Are you sure you would like to exit the program? Y/N: ")
+                    if bye == 'y' or bye == 'Y':
+                        page = 'q'
+                        break
+                    else:
+                        page = 'h'
+                        break
+                elif ready.lower() == 'y':
+                    print("\nGreat! We have a few questions for you.")
+                    while True:
+                        book_length = input("How many pages are in your book? ")
+                        if book_length.lower() == "q":
+                            page = 'q'
+                            break
+                        print("Your book is ", book_length, " pages.")
+                        verify = input("Is this correct? (Y/N) ")
+                        while verify.upper() == 'N':
+                            book_length = input("How many pages are in your book? ")
+                            if book_length.lower() == "q":
+                                page = 'q'
+                                break
+                            print("Your book is ", book_length, " pages.")
+                            verify = input("Is this correct? (Y/N) ")
+                        print("\nNow we need to establish your reading rate. You can enter how many minutes it takes "
+                              "you"
+                              "to read one page, or you can use our reading timer feature. It might take a bit longer,"
+                              "but it will provide a more accurate reading rate.\n")
+                        choice = input("If you would like to try our timer, hit '0', or hit any other key to enter "
+                                       "your minutes manually: ")
+                        if choice == '0':
+                            print("Great! Let's do it.")
+                            # stopwatch function and rate calculator go here
+                        else:
+                            read_rate = input("How many minutes does it take you to read one page? ")
+                            if read_rate.lower() == "q":
+                                page = 'q'
+                                break
+                            verify = input("You entered" + read_rate + " minutes. Is this correct? (Y/N): ")
+                            while verify.upper() == 'N':
+                                read_rate = input("How many minutes does it take you to read one page? ")
+                                print("Your reading rate is ", read_rate, " minutes.")
+                                verify = input("Is this correct? (Y/N) ")
+                        print("\nPlease select the time format you would like to receive your total expected reading "
+                              "time in.")
+                        print("Enter 1 for seconds.")
+                        print("Enter 2 for minutes.")
+                        print("Enter 3 for hours.")
+                        time_format = input("Enter menu number: ")
+                        if time_format.lower == 'q':
+                            bye = input("Are you sure you would like to exit the program? Y/N: ")
+                            if bye == 'y' or bye == 'Y':
+                                page = 'q'
+                            break
+                        elif time_format in conversion_options:
+                            page = conversion_options[int(time_format) - 1]
+                            break
+                        else:
+                            raise InvalidEntry()
+            except InvalidEntry as error:
+                print("Invalid entry. Please choose from the given options.")
+            break
+
+    # Second Conversion Page
+    elif page == '1':
+        print("\n Here is the number of seconds it will take you to complete your book based "
+              "on the length of the book and your reading rate: (Number posted here after being determined by "
+              "microservice\n")
+        go = input("If you would like to convert to another format, press '2' for minutes or '3' for hours. If you "
+                   "are done, press any other key to exit:")
+        if go == '2':
+            page = '2'
+        elif go == '3':
+            page = '3'
+        else:
+            page = 'e'
+
+    # Minutes Conversion Page
+    elif page == '2':
+        print("\nHere is the number of minutes it will take you to complete your book based on the length of the book"
+              " and your reading rate: (Number posted here after being determined by "
+              "microservice\n")
+        go = input("If you would like to convert to another format, press '1' for seconds or '3' for hours. If you "
+                   "are done, press any other key to exit:")
+        if go == '1':
+            page = '1'
+        elif go == '3':
+            page = '3'
+        else:
+            page = 'e'
+
+    # Hours Conversion Page
+    elif page == '3':
+        print("\nHere is the number of hours it will take you to complete your book based on the length of the book"
+              " and your reading rate: (Number posted here after being determined by "
+              "microservice\n")
+        go = input("If you would like to convert to another format, press '1' for seconds or '2' for minutes. If you "
+                   "are done, press any other key to exit:")
+        if go == '1':
+            page = '1'
+        elif go == '2':
+            page = '2'
+        else:
+            page = 'e'
+    # Exit page
+    elif page == 'e':
+        print("We hope this has helped you plan your reading time!")
+        print("Coming soon: Calculate the amount of reading you have to do to finish by a certain deadline!"
+              "Don't worry, you'll still have all the features you do now, we just want to give you the option"
+              " of having one more.")
+        print("See you next time, and enjoy your book!")
+        page = 'q'
